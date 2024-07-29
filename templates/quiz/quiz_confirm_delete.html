@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<div class='container'>
+
+    <h2>{% translate "Delete quiz" %}</h2>
+    <p>{% translate "Are you sure you want to delete quiz" %}  {{object.title}} </p>
+
+    <form method='post'>
+        {% csrf_token %}
+        <button type='submit' class='btn btn-danger'>{% translate "Yes, delete" %} </button>
+        <a href='{% url "quiz:quiz-list"   %}' > {% translate "No" %} </a >
+    </form>
+
+</div>
+
+{% endblock content %}
+
+
+

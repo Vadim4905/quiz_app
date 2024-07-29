@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+
+
+{% block content %}
+{{request.kwargs.pk}}
+  {% comment %} <h1>
+    {% if object %}
+      {% translate "Edit content" %} "{{ object.title }}"
+    {% else %}
+      {% translate "Add new question" %}
+    {% endif %} {% endcomment %}
+  </h1>
+
+    <form action="" method="post" enctype="multipart/form-data">
+      {{ form.as_p }}
+      {% csrf_token %}
+      <button type="submit" class="small-gray-btn">{% translate "Save quiz" %} </button>
+    </form>
+
+{% endblock %}

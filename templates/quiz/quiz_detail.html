@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load custom_tags %}
+
+
+{% block content %}
+<h1>{{quiz}}</h1>
+
+{% for question in quiz.questions.all %}
+    {% with item=question.item %}
+
+    <div class="survey-card">
+    <div class="card-body">
+        <h5 class="survey-card-title">{{ item.title }}</h5>
+        {% for answer in question.answers.all %}
+            {{answer}}
+        {% endfor %}
+        <p class="survey-card-text">
+        {% if item|model_name == 'optionquestion' %}
+            <ul>
+            {% for option in item.options.all %}
+                <li>{{ option }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        </p>
+
+        <form method='post' action='{% url "quiz:answer-create" question.pk %}'> 
+            {% csrf_token %}
+            <input type="text" id="answer" name="answer" value=""><br>
+            <button type="submit">{% translate "Add answer" %}</button>
+        </form>
+
+        <a href="{% url 'quiz:question-update' quiz.id item|model_name item.id %}">
+        {% translate "Edit" %}
+        </a>
+        
+        <form method='post' action='{% url "quiz:question-delete" question.pk %}'>
+        {% csrf_token %}
+        <button type="submit">{% translate "Delete question" %}</button>
+        </form> 
+
+    </div>
+    </div>
+
+    <br>
+    {% endwith %}
+{% endfor %}
+
+<ul>
+    <li><a href='{% url "quiz:question-create" quiz.pk "textquestion"  %}' >{% translate "Create text question" %}</a></li>
+    <li><a href='{% url "quiz:question-create" quiz.pk "optionquestion"  %}' >{% translate "Create option question" %}</a></li>
+    <li><a href='{% url "quiz:question-create" quiz.pk "booleanquestion"  %}' >{% translate "Create true or false question" %}</a></li>
+</ul>
+
+{% comment %} <form action="{% url 'quiz:create-session' quiz.pk %}" method="post"  >
+    {% csrf_token %}
+    <button type="submit" class="small-gray-btn">{% translate "Host live" %} </button>
+</form> {% endcomment %}
+
+
+{% endblock content %}
+
+
+
