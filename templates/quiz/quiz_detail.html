@@ -53,10 +53,10 @@
     <li><a href='{% url "quiz:question-create" quiz.pk "booleanquestion"  %}' >{% translate "Create true or false question" %}</a></li>
 </ul>
 
-{% comment %} <form action="{% url 'quiz:create-session' quiz.pk %}" method="post"  >
+ <form action="{% url 'quiz_session:create-session' quiz.pk %}" method="post"  >
     {% csrf_token %}
     <button type="submit" class="small-gray-btn">{% translate "Host live" %} </button>
-</form> {% endcomment %}
+</form> 
 
 
 {% endblock content %}
