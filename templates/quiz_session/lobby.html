@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+
+{% block content %}
+
+<h1>{% translate "Lobby" %}</h1>
+
+{% for user in session.users.all %}
+    {{user}}
+{% endfor %}
+
+<a href='{% url "quiz_session:join-session" %}?code={{session.code}}' >Copy url to join</a>
+
+{% endblock content %}
+
+
+
