@@ -23,6 +23,7 @@ class QuizSession(models.Model):
     creator = models.ForeignKey(get_user_model(),on_delete=models.CASCADE,related_name='quiz_sessions')
     quiz = models.ForeignKey('quiz.Quiz',on_delete=models.CASCADE,related_name='quiz_sessions')
     created = models.DateTimeField(auto_now_add=True)
+    current_question = models.ForeignKey('quiz.Question',on_delete=models.DO_NOTHING)
     
         
 class SessionUser(models.Model):
