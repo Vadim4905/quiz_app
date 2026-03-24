@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load custom_tags %}
+{% load i18n %}
+
+
+{% block content %}
+
+
+{% with item=question.item %}
+
+    <div class="survey-card">
+    <div class="card-body">
+        <h5 class="survey-card-title">{{ item.title }}</h5>
+        <p class="survey-card-text">
+        {% if item|model_name == 'optionquestion' %}
+            <ul>
+            {% for option in item.options.all %}
+                <li>{{ option }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        </p>
+
+       
+
+    </div>
+    </div>
+
+    <br>
+    {% endwith %}
+    <form action='' method="post">  
+        {% csrf_token %}
+        <button type="submit" class="small-gray-btn">{% translate "Next question" %} </button>
+    </form>
+
+
+
+{% endblock content %}

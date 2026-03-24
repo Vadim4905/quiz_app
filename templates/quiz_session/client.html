@@ -3,6 +3,38 @@
 
 {% block content %}
 
+<div id='question' >
+
+</div>
+
+
+<script>
+    const url = 'ws://' + window.location.host +
+              '/ws/session/client/';
+    const roomSocket = new WebSocket(url);
+
+    roomSocket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        console.log(data);
+
+        if (data.type === 'question'){
+            const question_element = document.getElementById('question');
+
+            if (data.type.qustion === 'textquestion'){
+                question_element.innerHTML =  '';
+            }
+            else if (data.type.qustion === 'optionquestion'){
+
+            }
+            else if (data.type.qustion === 'booleanquestion'){
+
+            }
+        }
+
+    };
+
+
+</script>
 
 {% endblock content %}
 

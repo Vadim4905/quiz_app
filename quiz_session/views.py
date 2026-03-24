@@ -5,15 +5,18 @@ from django.views.generic.base import TemplateResponseMixin
 from django.forms.models import modelform_factory
 from django.apps import apps
 from django.http import Http404,HttpResponseRedirect,HttpResponse
+from django.template import Context, Template
+# from django.forms import formsets,Form
 from django import forms
-from django.forms import formsets
 from django.urls import reverse_lazy,reverse
 from django.db.utils import IntegrityError
 from django.contrib import messages
+from asgiref.sync import async_to_sync
 
+from channels.layers import get_channel_layer
 import random
 
-from . import forms
+from .forms import NameForm,CodeForm
 from . import models
 from quiz import models as quiz_models
 
@@ -24,13 +27,54 @@ class CreateQuizSessionView(LoginRequiredMixin,View):
         session = models.QuizSession.objects.create(
             creator = request.user,
             quiz=quiz,
+            current_question=quiz.questions.all()[0]
         )
         return redirect('quiz_session:admin-view-session',session.pk)
         
-class AdminSessionView(View):
+class AdminSessionView(LoginRequiredMixin,View):
+    
+    def dispatch(self,request,session_pk):
+        self.session = get_object_or_404(models.QuizSession,pk=session_pk,creator=request.user)
+        return super().dispatch(request,session_pk)
+    
+    
     def get(self,request,session_pk):
-        session = get_object_or_404(models.QuizSession,pk=session_pk)
-        return render(request,'quiz_session/lobby.html',{'session':session})
+        return render(request,'quiz_session/lobby.html',{'session':self.session})
+    
+    def post(self,request,session_pk):
+        step = request.session.get('step')
+        if step is None:
+            request.session['step'] = -1
+        request.session['step'] +=1
+        try :
+            question = self.session.quiz.questions.all()[request.session['step']]
+            question_form =type('Form', (forms.Form,), {question.id:forms.CharField(label=question.item.title)})
+            template = Template("""{% load i18n %} <form action="" method="post" enctype="multipart/form-data">
+#     {{ form.as_p }}
+#     {% csrf_token %}
+#     <button type="submit" class="small-gray-btn">{% translate "submit" %} </button>
+# </form>""")
+            context = Context({"form":question_form})
+            rendered_question = template.render(context)
+            
+            layer = get_channel_layer()
+            async_to_sync( get_channel_layer().group_send)(
+                f'client_{self.session.id}',
+                {
+                    "type": "question",
+                    "question": question_form
+                }
+            )
+        except IndexError:
+            del  request.session['step']
+            return HttpResponse('quiz completed')
+        
+        return render(request,'quiz_session/question_admin.html',{'session':self.session,'question':question})
+    
+# class CompleteSessionView(LoginRequiredMixin,View):
+#     def dispatch(self,request,session_pk):
+#         self.session = get_object_or_404(models.QuizSession,pk=session_pk,creator=request.user)
+#         return super().dispatch(request)
     
 class JoinSessionView(TemplateResponseMixin,View):
     session = None
@@ -39,11 +83,11 @@ class JoinSessionView(TemplateResponseMixin,View):
     def get(self,request,):
         if self.session:
             return self.render_to_response(
-            {'form': forms.NameForm(), }
+            {'form': NameForm(), }
         )
         else:
             return self.render_to_response(
-            {'form': forms.CodeForm(), }
+            {'form': CodeForm(), }
         )
     
     def dispatch(self,request):
@@ -54,7 +98,7 @@ class JoinSessionView(TemplateResponseMixin,View):
     
     def post(self,request):
         if self.session:
-            form = forms.NameForm(request.POST)
+            form = NameForm(request.POST)
             if form.is_valid():
                 name = form.cleaned_data['name']
                 try:
@@ -85,3 +129,8 @@ class ClientSessionView(View):
         except models.SessionUser.DoesNotExist:
             return redirect('quiz_session:join-session')
         return render(request,'quiz_session/client.html')
+    [{"id":"17","channel":"/meta/connect","connectionType":"websocket","clientId":"4mzhv1lr8c5xorgaep9n9zocfmj3fb","ext":{"ack":11,"timesync":{"tc":1727563262344,"l":307,"o":-154}}}]
+    def post(self,request):
+        pass
+    
+
