@@ -6,11 +6,51 @@
 
 <h1>{% translate "Lobby" %}</h1>
 
+<ul id='users'>
 {% for user in session.users.all %}
-    {{user}}
+    {% comment %} {{user}} {% endcomment %}
 {% endfor %}
+</ul>
+
+
+<form action='' method="post">  
+    {% csrf_token %}
+    <button type="submit" class="small-gray-btn">{% translate "Start quiz" %} </button>
+</form>
 
 <a href='{% url "quiz_session:join-session" %}?code={{session.code}}' >Copy url to join</a>
+
+
+
+<script>
+    const url = 'ws://' + window.location.host +
+              '/ws/session/admin/' + '{{session.pk}}' + '/';
+    const roomSocket = new WebSocket(url);
+
+
+
+    roomSocket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.type === 'new_user'){
+            const users = document.getElementById('users');
+            users.innerHTML += '<li id="user_' + data.username + '">'+
+                                data.username +
+                                '</li>';
+        }
+        else if(data.type === 'disconected_user'){
+            const user = document.getElementById('user_'+data.username);
+            user.remove();
+        }
+        
+        
+
+        console.log(data);
+    };
+
+
+</script>
+
+
 
 {% endblock content %}
 
