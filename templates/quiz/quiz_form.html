@@ -1,22 +1,18 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
 
 
 {% block content %}
-{{request.kwargs.pk}}
-  {% comment %} <h1>
-    {% if object %}
-      {% translate "Edit content" %} "{{ object.title }}"
-    {% else %}
-      {% translate "Add new question" %}
-    {% endif %} {% endcomment %}
-  </h1>
 
+  <div class="container d-flex justify-content-center align-items-center">
     <form action="" method="post" enctype="multipart/form-data">
-      {{ form.as_p }}
+      {{ form|crispy }}
       {% csrf_token %}
-      <button type="submit" class="small-gray-btn">{% translate "Save quiz" %} </button>
+      
+      <button type="submit" class="btn btn-primary">{% translate "Save quiz" %} </button>
     </form>
+  </div>
 
 {% endblock %}

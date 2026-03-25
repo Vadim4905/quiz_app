@@ -4,9 +4,17 @@
 
 
 {% block content %}
+
+
 <h1>{{quiz}}</h1>
 
+ <form action="{% url 'quiz_session:create-session' quiz.pk %}" method="post"  >
+    {% csrf_token %}
+    <button type="submit" class="btn btn-warning">{% translate "Host live" %} </button>
+</form> 
+
 {% for question in quiz.questions.all %}
+    <div class="container d-flex justify-content-center align-items-center">
     {% with item=question.item %}
 
     <div class="survey-card">
@@ -28,7 +36,9 @@
         <form method='post' action='{% url "quiz:answer-create" question.pk %}'> 
             {% csrf_token %}
             <input type="text" id="answer" name="answer" value=""><br>
-            <button type="submit">{% translate "Add answer" %}</button>
+            
+            <button type="submit" class="btn btn-primary">{% translate "Add answer" %} </button>
+
         </form>
 
         <a href="{% url 'quiz:question-update' quiz.id item|model_name item.id %}">
@@ -37,7 +47,7 @@
         
         <form method='post' action='{% url "quiz:question-delete" question.pk %}'>
         {% csrf_token %}
-        <button type="submit">{% translate "Delete question" %}</button>
+        <button type="submit" class="btn btn-danger">{% translate "Delete question" %} </button>
         </form> 
 
     </div>
@@ -45,6 +55,7 @@
 
     <br>
     {% endwith %}
+    </div>
 {% endfor %}
 
 <ul>
@@ -53,10 +64,6 @@
     <li><a href='{% url "quiz:question-create" quiz.pk "booleanquestion"  %}' >{% translate "Create true or false question" %}</a></li>
 </ul>
 
- <form action="{% url 'quiz_session:create-session' quiz.pk %}" method="post"  >
-    {% csrf_token %}
-    <button type="submit" class="small-gray-btn">{% translate "Host live" %} </button>
-</form> 
 
 
 {% endblock content %}
